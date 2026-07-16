@@ -117,6 +117,18 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 
+# Tell Django where to collect static files for production
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+
+# If you have custom static files locally (like Tailwind/custom CSS)
+STATICFILES_DIRS = [
+    BASE_DIR / 'static',
+]
+
+# Enable WhiteNoise's compression and caching for production static serving
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
+# Media Files (User uploads)
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
