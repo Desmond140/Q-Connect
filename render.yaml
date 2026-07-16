@@ -1,11 +1,5 @@
+# 1. Non-Postgres web services go here
 services:
-  # 1. The PostgreSQL Database Service
-  - type: db
-    name: qconnect-db
-    plan: free
-    ipAllowList: []
-
-  # 2. The Python Web Service
   - type: web
     name: q-connect
     plan: free
@@ -21,3 +15,9 @@ services:
         generateValue: true
       - key: DEBUG
         value: "False"
+
+# 2. PostgreSQL databases must have their own top-level list
+databases:
+  - name: qconnect-db
+    plan: free
+    ipAllowList: []

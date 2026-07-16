@@ -88,25 +88,25 @@ def landing(request):
 
 @login_required
 def matches_list(request):
-    # 1. Get the IDs of everyone YOU liked
-    liked_by_me = Match.objects.filter(
+    # 1. Get IDs of profiles you liked
+    likes_sent = Match.objects.filter(
         sender=request.user,
         is_liked=True
     ).values_list('receiver_id', flat=True)
 
-    # 2. Find which of those users have ALSO liked YOU
-    users_who_liked_me_back = Match.objects.filter(
-        sender_id__in=liked_by_me,
+    # 2. Get IDs of profiles who liked you back
+    likes_received = Match.objects.filter(
         receiver=request.user,
         is_liked=True
     ).values_list('sender_id', flat=True)
 
-    # 3. Pull the Profiles of those mutual matches
-    mutual_matches = Profile.objects.filter(
-        user_id__in=users_who_liked_me_back
-    ).select_related('user')
+    # 3. Find the overlap (mutual matches!)
+    mutual_user_ids = set(likes_sent).intersection(set(likes_received))
 
-    return render(request, 'core/matches.html', {'matches': mutual_matches})
+    # 4. Fetch the Profiles of those mutual matches
+    mutual_matches = Profile.objects.filter(user_id__in=mutual_user_ids)
+
+    return render(request, 'core/matches.html', {'profiles': mutual_matches})
 
 
 
