@@ -1,0 +1,23 @@
+services:
+  # 1. The PostgreSQL Database Service
+  - type: db
+    name: qconnect-db
+    plan: free
+    ipAllowList: []
+
+  # 2. The Python Web Service
+  - type: web
+    name: q-connect
+    plan: free
+    runtime: python
+    buildCommand: "./build.sh"
+    startCommand: "gunicorn student_date.wsgi:application"
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: qconnect-db
+          property: connectionString
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DEBUG
+        value: "False"

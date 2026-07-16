@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Matches - Q-Connect</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-50 min-h-screen">
+
+    <nav class="bg-white border-b border-gray-100 sticky top-0 z-50">
+        <div class="max-w-5xl mx-auto px-4 py-4 flex justify-between items-center">
+            <a href="{% url 'home' %}" class="text-2xl font-black text-red-500 tracking-tight flex items-center space-x-2">
+                <span>❤️ Q-Connect</span>
+            </a>
+            <div class="flex items-center space-x-6">
+                <a href="{% url 'home' %}" class="text-gray-600 hover:text-red-500 font-semibold transition">Discover</a>
+                <a href="{% url 'matches_list' %}" class="text-red-500 font-bold border-b-2 border-red-500 pb-1 transition">Matches</a>
+<form action="{% url 'logout' %}" method="POST" class="inline">
+    {% csrf_token %}
+    <button type="submit" class="text-gray-400 hover:text-gray-600 text-sm transition font-semibold bg-transparent border-0 cursor-pointer p-0">
+        Log out
+    </button>
+</form>            </div>
+        </div>
+    </nav>
+
+    <main class="max-w-5xl mx-auto px-4 py-10">
+        <h1 class="text-3xl font-black text-gray-900 mb-2">Your Connections</h1>
+        <p class="text-gray-500 mb-8">Get the conversation started! Drop them a DM on Instagram.</p>
+
+        {% if matches %}
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+                {% for profile in matches %}
+                    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden transform hover:-translate-y-1 transition duration-300">
+                        <div class="h-64 bg-gray-200 relative">
+                            {% if profile.profile_pic %}
+                                <img src="{{ profile.profile_pic.url }}" alt="{{ profile.user.first_name }}" class="w-full h-full object-cover">
+                            {% else %}
+                                <div class="w-full h-full flex items-center justify-center bg-rose-50">
+                                    <i class="fa-regular fa-user text-5xl text-rose-200"></i>
+                                </div>
+                            {% endif %}
+
+                            <span class="absolute bottom-3 left-3 bg-red-500 text-white text-xs font-bold px-2.5 py-1 rounded-full uppercase tracking-wider shadow-sm">
+                                {{ profile.get_residence_display }}
+                            </span>
+                        </div>
+
+                        <div class="p-5 space-y-3">
+                            <div>
+                                <h3 class="text-xl font-bold text-gray-900">{{ profile.user.first_name }}</h3>
+                                <p class="text-xs text-red-500 font-semibold uppercase tracking-wider">{{ profile.university }}</p>
+                            </div>
+
+                            <p class="text-sm text-gray-600 line-clamp-2">
+                                "{{ profile.bio }}"
+                            </p>
+
+                           <div class="space-y-2">
+    <a href="{% url 'chat_room' profile.user.username %}" class="block w-full text-center bg-gradient-to-r from-red-500 to-rose-500 hover:from-red-600 hover:to-rose-600 text-white font-bold py-2.5 rounded-xl shadow transition duration-200">
+        <i class="fa-solid fa-comments mr-2"></i> Chat Now
+    </a>
+
+    {% if profile.instagram_handle %}
+        <a href="https://instagram.com/{{ profile.instagram_handle }}" target="_blank" class="block w-full text-center text-xs text-gray-500 hover:text-red-500 transition font-medium">
+            <i class="fa-brands fa-instagram"></i> @{{ profile.instagram_handle }}
+        </a>
+    {% endif %}
+</div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="bg-white rounded-2xl border border-gray-100 p-12 text-center max-w-md mx-auto mt-10">
+                <div class="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <i class="fa-regular fa-heart text-2xl text-red-500 animate-bounce"></i>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900 mb-2">No matches yet!</h3>
+                <p class="text-gray-500 mb-6">Don't lose hope. Keep exploring profiles in your residence hall and sending out those likes!</p>
+                <a href="{% url 'home' %}" class="inline-block bg-red-500 hover:bg-red-600 text-white font-bold px-6 py-3 rounded-full transition shadow-md">
+                    Start Swiping
+                </a>
+            </div>
+        {% endif %}
+    </main>
+
+</body>
+</html>

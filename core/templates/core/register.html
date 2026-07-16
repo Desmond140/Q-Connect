@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Join Q-Connect</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 min-h-screen py-10 px-4 flex items-center justify-center">
+
+    <div class="bg-white rounded-2xl shadow-xl max-w-lg w-full p-8 border border-gray-100">
+        <div class="text-center mb-8">
+            <h1 class="text-3xl font-extrabold text-red-500 tracking-tight">❤️ Q-Connect</h1>
+            <p class="text-gray-500 mt-2">Find your vibe at Qwetu & Qejani residences</p>
+        </div>
+
+        <form method="POST" enctype="multipart/form-data" class="space-y-5">
+            {% csrf_token %}
+
+            {% if form.errors %}
+                <div class="bg-red-50 text-red-600 p-4 rounded-lg text-sm">
+                    Please correct the errors below and try again.
+                </div>
+            {% endif %}
+
+            <div>
+                <label class="block text-gray-700 font-semibold mb-1">First Name</label>
+                {{ form.first_name }}
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-gray-700 font-semibold mb-1">Username</label>
+                    {{ form.username }}
+                </div>
+                <div>
+                    <label class="block text-gray-700 font-semibold mb-1">Password</label>
+                    {{ form.password }}
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-gray-700 font-semibold mb-1">I am a...</label>
+                    {{ form.gender }}
+                </div>
+                <div>
+                    <label class="block text-gray-700 font-semibold mb-1">Looking for...</label>
+                    {{ form.interested_in }}
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-gray-700 font-semibold mb-1">My Residence</label>
+                    {{ form.residence }}
+                </div>
+                <div>
+                    <label class="block text-gray-700 font-semibold mb-1">My University</label>
+                    {{ form.university }}
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-gray-700 font-semibold mb-1">Short Bio</label>
+                {{ form.bio }}
+            </div>
+
+            <div>
+                <label class="block text-gray-700 font-semibold mb-1">Profile Photo</label>
+                <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-lg">
+                    <div class="space-y-1 text-center">
+                        {{ form.profile_pic }}
+                    </div>
+                </div>
+            </div>
+
+            <button type="submit" class="w-full bg-red-500 hover:bg-red-600 text-white font-bold py-3 px-4 rounded-xl shadow-lg transition duration-200">
+                Create Account & Start Swiping
+            </button>
+        </form>
+
+        <p class="text-center text-sm text-gray-500 mt-6">
+            Already have an account? <a href="{% url 'login' %}" class="text-red-500 hover:underline font-semibold">Log in</a>
+        </p>
+    </div>
+
+</body>
+</html>

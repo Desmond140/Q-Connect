@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Profile - Q-Connect</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-50 min-h-screen pb-12">
+
+    <!-- Navbar -->
+    <nav class="bg-white border-b border-gray-100 sticky top-0 z-50">
+        <div class="max-w-5xl mx-auto px-4 py-4 flex justify-between items-center">
+            <a href="{% url 'home' %}" class="text-2xl font-black text-red-500 tracking-tight flex items-center space-x-2">
+                <span>❤️ Q-Connect</span>
+            </a>
+            <div class="flex items-center space-x-6">
+                <a href="{% url 'home' %}" class="text-gray-600 hover:text-red-500 font-semibold transition">Discover</a>
+                <a href="{% url 'matches_list' %}" class="text-gray-600 hover:text-red-500 font-semibold transition">Matches</a>
+                <form action="{% url 'logout' %}" method="POST" class="inline">
+                    {% csrf_token %}
+                    <button type="submit" class="text-gray-400 hover:text-gray-600 text-sm transition font-semibold bg-transparent border-0 cursor-pointer p-0">
+                        Log out
+                    </button>
+                </form>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Content Card -->
+    <main class="max-w-xl mx-auto px-4 mt-8">
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
+            <div class="flex items-center space-x-4 mb-8">
+                <a href="{% url 'home' %}" class="w-10 h-10 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-600 transition">
+                    <i class="fa-solid fa-arrow-left"></i>
+                </a>
+                <div>
+                    <h1 class="text-2xl font-black text-gray-900">Your Profile</h1>
+                    <p class="text-gray-500 text-sm">Update your information for matches near you</p>
+                </div>
+            </div>
+
+            <!-- Form -->
+            <form method="POST" enctype="multipart/form-data" class="space-y-6">
+                {% csrf_token %}
+
+                <div>
+                    <label class="block text-gray-700 font-bold mb-1">Display Name (First Name)</label>
+                    {{ form.first_name }}
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-gray-700 font-bold mb-1">My Gender</label>
+                        {{ form.gender }}
+                    </div>
+                    <div>
+                        <label class="block text-gray-700 font-bold mb-1">Interested In</label>
+                        {{ form.interested_in }}
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-gray-700 font-bold mb-1">My Residence</label>
+                        {{ form.residence }}
+                    </div>
+                    <div>
+                        <label class="block text-gray-700 font-bold mb-1">University</label>
+                        {{ form.university }}
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-gray-700 font-bold mb-1">Instagram Handle</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400 font-semibold">@</span>
+                        <div class="pl-7">
+                            {{ form.instagram_handle }}
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-gray-700 font-bold mb-1">Short Bio</label>
+                    {{ form.bio }}
+                </div>
+
+                <div>
+                    <label class="block text-gray-700 font-bold mb-1">Profile Photo</label>
+                    <div class="mt-2 flex items-center space-x-4">
+                        {% if form.instance.profile_pic %}
+                            <img src="{{ form.instance.profile_pic.url }}" alt="current photo" class="w-16 h-16 rounded-xl object-cover border">
+                        {% endif %}
+                        <div class="flex-1">
+                            {{ form.profile_pic }}
+                        </div>
+                    </div>
+                </div>
+
+                <button type="submit" class="w-full bg-red-500 hover:bg-red-600 text-white font-bold py-3 px-4 rounded-xl shadow-md transition duration-200 mt-4">
+                    Save Updates
+                </button>
+            </form>
+        </div>
+    </main>
+
+</body>
+</html>

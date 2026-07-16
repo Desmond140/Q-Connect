@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Q-Connect - Discover</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        /* Card Container Styling */
+        .card-container {
+            position: relative;
+            height: 520px;
+            width: 100%;
+            max-width: 380px;
+            perspective: 1000px;
+        }
+        /* Card Physics & Physics Triggers */
+        .swipe-card {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            cursor: grab;
+            user-select: none;
+            touch-action: none;
+            will-change: transform;
+            transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .swipe-card:active {
+            cursor: grabbing;
+            transition: none !important;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen flex flex-col justify-between overflow-x-hidden">
+
+    <nav class="bg-white border-b border-gray-100 sticky top-0 z-50 w-full">
+        <div class="max-w-5xl mx-auto px-4 py-4 flex justify-between items-center">
+            <a href="{% url 'home' %}" class="text-2xl font-black text-red-500 tracking-tight flex items-center space-x-2">
+                <span>❤️ Q-Connect</span>
+            </a>
+            <div class="flex items-center space-x-6">
+                <a href="{% url 'home' %}" class="text-red-500 font-bold border-b-2 border-red-500 pb-1 transition">Discover</a>
+                <a href="{% url 'matches_list' %}" class="text-gray-600 hover:text-red-500 font-semibold transition">Matches</a>
+                <a href="{% url 'edit_profile' %}" class="text-gray-600 hover:text-red-500 font-semibold transition">Profile</a>
+                <form action="{% url 'logout' %}" method="POST" class="inline">
+                    {% csrf_token %}
+                    <button type="submit" class="text-gray-400 hover:text-gray-600 text-sm transition font-semibold bg-transparent border-0 cursor-pointer p-0">
+                        Log out
+                    </button>
+                </form>
+            </div>
+        </div>
+    </nav>
+
+    <main class="flex-1 flex flex-col items-center justify-center px-4 py-8">
+        {% if profile %}
+            <div class="card-container">
+                <div id="activeCard" class="swipe-card bg-white rounded-3xl shadow-xl border border-gray-100 overflow-hidden flex flex-col justify-end">
+
+                    <div id="likeStamp" class="absolute top-10 left-10 border-4 border-emerald-500 text-emerald-500 text-3xl font-black px-4 py-2 rounded-xl uppercase tracking-widest rotate-[-12deg] opacity-0 pointer-events-none z-30">LIKE</div>
+                    <div id="nopeStamp" class="absolute top-10 right-10 border-4 border-rose-500 text-rose-500 text-3xl font-black px-4 py-2 rounded-xl uppercase tracking-widest rotate-[12deg] opacity-0 pointer-events-none z-30">NOPE</div>
+
+                    {% if profile.profile_pic %}
+                        <img src="{{ profile.profile_pic.url }}" alt="{{ profile.user.first_name }}" class="absolute inset-0 w-full h-full object-cover pointer-events-none">
+                    {% else %}
+                        <div class="absolute inset-0 bg-gradient-to-tr from-rose-100 to-rose-50 flex items-center justify-center pointer-events-none">
+                            <i class="fa-regular fa-user text-8xl text-rose-200"></i>
+                        </div>
+                    {% endif %}
+
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent pointer-events-none z-10"></div>
+
+                    <div class="p-6 text-white z-20 relative pointer-events-none">
+                        <div class="flex items-center space-x-2">
+                            <span class="bg-red-500 text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-widest shadow">
+                                {{ profile.get_residence_display }}
+                            </span>
+                        </div>
+                        <h2 class="text-3xl font-black mt-2">{{ profile.user.first_name }}</h2>
+                        <p class="text-sm text-gray-300 font-semibold tracking-wider uppercase mt-0.5">{{ profile.university }}</p>
+                        <p class="text-sm text-gray-200 italic mt-3 font-medium">"{{ profile.bio }}"</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex items-center justify-center space-x-6 mt-8">
+                <button onclick="triggerSwipe('left')" class="w-14 h-14 rounded-full bg-white shadow-md hover:shadow-lg border border-gray-100 flex items-center justify-center text-rose-500 hover:text-rose-600 transform hover:scale-110 active:scale-95 transition">
+                    <i class="fa-solid fa-xmark text-2xl"></i>
+                </button>
+                <button onclick="triggerSwipe('right')" class="w-16 h-16 rounded-full bg-gradient-to-r from-red-500 to-rose-500 shadow-lg shadow-red-200 hover:shadow-xl flex items-center justify-center text-white transform hover:scale-110 active:scale-95 transition">
+                    <i class="fa-solid fa-heart text-2xl"></i>
+                </button>
+            </div>
+
+        {% else %}
+            <div class="bg-white rounded-3xl border border-gray-100 p-12 text-center max-w-sm w-full shadow-sm">
+                <div class="w-20 h-20 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <i class="fa-solid fa-map-pin text-3xl text-red-500 animate-bounce"></i>
+                </div>
+                <h3 class="text-2xl font-black text-gray-900 mb-2">You've cleared the deck!</h3>
+                <p class="text-gray-500 mb-6 text-sm">There are no more students matching your criteria in your area right now. Try checking your matches or updating your preferences!</p>
+                <a href="{% url 'edit_profile' %}" class="inline-block bg-red-500 hover:bg-red-600 text-white font-bold px-6 py-3 rounded-full transition shadow-md text-sm">
+                    Edit Preferences
+                </a>
+            </div>
+        {% endif %}
+    </main>
+
+    {% if profile %}
+    <form id="likeForm" action="{% url 'like_user' profile.user.id %}" method="POST" class="hidden">
+        {% csrf_token %}
+    </form>
+    <form id="skipForm" action="{% url 'skip_user' profile.user.id %}" method="POST" class="hidden">
+        {% csrf_token %}
+    </form>
+    {% endif %}
+
+    <script>
+        const card = document.getElementById('activeCard');
+        const likeStamp = document.getElementById('likeStamp');
+        const nopeStamp = document.getElementById('nopeStamp');
+
+        if (card) {
+            let startX, startY, currentX, currentY, rotate;
+            let isDragging = false;
+
+            // Touch & Mouse Down events
+            const dragStart = (e) => {
+                isDragging = true;
+                startX = e.clientX || e.touches[0].clientX;
+                startY = e.clientY || e.touches[0].clientY;
+            };
+
+            // Moving events
+            const dragMove = (e) => {
+                if (!isDragging) return;
+                currentX = (e.clientX || e.touches[0].clientX) - startX;
+                currentY = (e.clientY || e.touches[0].clientY) - startY;
+
+                // Dynamic calculations for rotation
+                rotate = currentX * 0.1;
+
+                // Move and rotate the card on dragging
+                card.style.transform = `translate(${currentX}px, ${currentY}px) rotate(${rotate}deg)`;
+
+                // Opacity logic for Stamps
+                if (currentX > 0) {
+                    likeStamp.style.opacity = Math.min(currentX / 100, 1);
+                    nopeStamp.style.opacity = 0;
+                } else {
+                    nopeStamp.style.opacity = Math.min(Math.abs(currentX) / 100, 1);
+                    likeStamp.style.opacity = 0;
+                }
+            };
+
+            // Touch & Mouse Up events
+            const dragEnd = () => {
+                if (!isDragging) return;
+                isDragging = false;
+
+                // Threshold to trigger swipe (150px)
+                if (currentX > 150) {
+                    swipeCard('right');
+                } else if (currentX < -150) {
+                    swipeCard('left');
+                } else {
+                    // Snap back to center
+                    card.style.transform = 'translate(0, 0) rotate(0deg)';
+                    likeStamp.style.opacity = 0;
+                    nopeStamp.style.opacity = 0;
+                }
+            };
+
+            // Event bindings
+            card.addEventListener('mousedown', dragStart);
+            card.addEventListener('touchstart', dragStart);
+
+            window.addEventListener('mousemove', dragMove);
+            window.addEventListener('touchmove', dragMove);
+
+            window.addEventListener('mouseup', dragEnd);
+            window.addEventListener('touchend', dragEnd);
+        }
+
+        // Direct Trigger actions via HUD buttons
+        function triggerSwipe(direction) {
+            if (!card) return;
+            if (direction === 'right') {
+                likeStamp.style.opacity = 1;
+                swipeCard('right');
+            } else {
+                nopeStamp.style.opacity = 1;
+                swipeCard('left');
+            }
+        }
+
+        // Handle physical swiping off screen & sending AJAX request to server
+        function swipeCard(direction) {
+            const flyX = direction === 'right' ? window.innerWidth + 100 : -window.innerWidth - 100;
+            card.style.transition = 'transform 0.5s ease-out';
+            card.style.transform = `translate(${flyX}px, 0px) rotate(${direction === 'right' ? 30 : -30}deg)`;
+
+            // Get form endpoints
+            const formId = direction === 'right' ? 'likeForm' : 'skipForm';
+            const form = document.getElementById(formId);
+
+            // Fetch AJAX to record Swipe securely
+            fetch(form.action, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': form.querySelector('[name=csrfmiddlewaretoken]').value,
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                // If it was a mutual match, you could display a congrats popup!
+                if (data.match) {
+                    alert("It's a Match! 🎉 Keep swiping or check your Matches page.");
+                }
+                // Reload feed dynamically to load the next profile queue
+                window.location.reload();
+            })
+            .catch(err => {
+                console.error("Swipe failed:", err);
+                window.location.reload();
+            });
+        }
+    </script>
+
+    <footer class="py-4 text-center text-xs text-gray-400">
+        &copy; 2026 Q-Connect. Keep it friendly, keep it local.
+    </footer>
+
+</body>
+</html>

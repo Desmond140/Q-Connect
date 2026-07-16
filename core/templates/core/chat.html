@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat with {{ other_user.first_name }} - Q-Connect</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-50 h-screen flex flex-col justify-between">
+
+    <header class="bg-white border-b border-gray-100 px-6 py-4 flex items-center justify-between shadow-sm shrink-0">
+        <div class="flex items-center space-x-4">
+            <a href="{% url 'matches_list' %}" class="text-gray-500 hover:text-gray-800 transition">
+                <i class="fa-solid fa-arrow-left text-xl"></i>
+            </a>
+
+            {% if other_user.profile.profile_pic %}
+                <img src="{{ other_user.profile.profile_pic.url }}" alt="avatar" class="w-10 h-10 rounded-full object-cover">
+            {% else %}
+                <div class="w-10 h-10 rounded-full bg-rose-50 flex items-center justify-center">
+                    <i class="fa-solid fa-user text-rose-300"></i>
+                </div>
+            {% endif %}
+            <div>
+                <h2 class="font-bold text-gray-900 leading-tight">{{ other_user.first_name }}</h2>
+                <p class="text-xs text-red-500 font-semibold">{{ other_user.profile.get_residence_display }}</p>
+            </div>
+        </div>
+    </header>
+
+    <main id="chatWindow" class="flex-1 overflow-y-auto p-6 space-y-4">
+        {% for msg in chat_messages %}
+            <div class="flex {% if msg.sender == request.user %}justify-end{% else %}justify-start{% endif %}">
+                <div class="max-w-xs md:max-w-md rounded-2xl px-4 py-3 shadow-sm text-sm
+                    {% if msg.sender == request.user %}
+                        bg-gradient-to-r from-red-500 to-rose-500 text-white rounded-br-none
+                    {% else %}
+                        bg-white border border-gray-100 text-gray-800 rounded-bl-none
+                    {% endif %}">
+                    <p class="break-words leading-relaxed">{{ msg.content }}</p>
+                    <span class="block text-[10px] mt-1 text-right {% if msg.sender == request.user %}text-red-100{% else %}text-gray-400{% endif %}">
+                        {{ msg.timestamp|date:"H:i" }}
+                    </span>
+                </div>
+            </div>
+        {% endfor %}
+    </main>
+
+    <footer class="bg-white border-t border-gray-100 p-4 shrink-0">
+        <form id="msgForm" action="{% url 'send_message' other_user.username %}" method="POST" class="max-w-4xl mx-auto flex items-center space-x-3">
+            {% csrf_token %}
+            <input type="text" id="msgInput" name="content" autocomplete="off" placeholder="Write a message..." class="flex-grow p-3 bg-gray-50 border border-gray-200 rounded-full focus:outline-none focus:ring-2 focus:ring-red-500 focus:bg-white text-sm transition">
+            <button type="submit" class="w-11 h-11 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center shadow-md hover:shadow-lg transform active:scale-95 transition shrink-0">
+                <i class="fa-solid fa-paper-plane text-sm"></i>
+            </button>
+        </form>
+    </footer>
+
+    <script>
+        const chatWindow = document.getElementById('chatWindow');
+        const msgForm = document.getElementById('msgForm');
+        const msgInput = document.getElementById('msgInput');
+
+        // Scroll immediately to the bottom of the chat window
+        const scrollToBottom = () => {
+            chatWindow.scrollTop = chatWindow.scrollHeight;
+        };
+        scrollToBottom();
+
+        // Handle sending message via AJAX
+        msgForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const content = msgInput.value.trim();
+            if (!content) return;
+
+            const formData = new FormData(msgForm);
+
+            // Clear input bar instantly for snappy UX
+            msgInput.value = '';
+
+            fetch(msgForm.action, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    // Inject message into chat UI immediately
+                    const rawMsg = `
+                        <div class="flex justify-end">
+                            <div class="max-w-xs md:max-w-md bg-gradient-to-r from-red-500 to-rose-500 text-white rounded-2xl rounded-br-none px-4 py-3 shadow-sm text-sm">
+                                <p class="break-words leading-relaxed">${data.content}</p>
+                                <span class="block text-[10px] mt-1 text-right text-red-100">${data.timestamp}</span>
+                            </div>
+                        </div>
+                    `;
+                    chatWindow.insertAdjacentHTML('beforeend', rawMsg);
+                    scrollToBottom();
+                }
+            });
+        });
+
+        // Loop to check for incoming messages from match (Every 2 seconds)
+        setInterval(() => {
+            fetch("{% url 'get_messages' other_user.username %}", {
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.messages.length > 0) {
+                    data.messages.forEach(msg => {
+                        const rawMsg = `
+                            <div class="flex justify-start">
+                                <div class="max-w-xs md:max-w-md bg-white border border-gray-100 text-gray-800 rounded-2xl rounded-bl-none px-4 py-3 shadow-sm text-sm">
+                                    <p class="break-words leading-relaxed">${msg.content}</p>
+                                    <span class="block text-[10px] mt-1 text-right text-gray-400">${msg.timestamp}</span>
+                                </div>
+                            </div>
+                        `;
+                        chatWindow.insertAdjacentHTML('beforeend', rawMsg);
+                    });
+                    scrollToBottom();
+                }
+            });
+        }, 2000);
+    </script>
+</body>
+</html>
