@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Processing Payment - Q-Connect</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-900 text-white flex items-center justify-center min-h-screen p-4">
+
+    <div class="max-w-md w-full bg-gray-800 rounded-2xl p-8 shadow-xl border border-gray-700 text-center space-y-6">
+
+        <!-- Animated Spinner -->
+        <div id="status-icon" class="flex justify-center">
+            <div class="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-pink-500"></div>
+        </div>
+
+        <h2 id="status-title" class="text-2xl font-bold">Waiting for PIN Confirmation</h2>
+        <p id="status-text" class="text-gray-400 text-sm">We've sent an M-Pesa prompt to your phone. Please enter your PIN to complete the transaction.</p>
+
+        <p class="text-xs text-gray-500">Do not close or refresh this page. We are verifying your payment status...</p>
+    </div>
+
+    <!-- Polling Script -->
+    <script>
+        const checkoutId = "{{ transaction.checkout_request_id }}";
+
+        // Poll the server every 3 seconds to check if Safaricom hit the webhook
+        const interval = setInterval(async () => {
+            try {
+                const response = await fetch(`/payment/processing/${checkoutId}/`, {
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                });
+                const data = await response.json();
+
+                if (data.has_paid || data.status === 'COMPLETED') {
+                    clearInterval(interval);
+                    document.getElementById('status-title').innerText = "Payment Successful!";
+                    document.getElementById('status-text').innerText = "Your chats are now unlocked! Redirecting...";
+                    document.getElementById('status-icon').innerHTML = "✅";
+
+                    setTimeout(() => {
+                        window.location.href = "{% url 'matches' %}"; // Redirect to chats/matches
+                    }, 2000);
+                } else if (data.status === 'FAILED') {
+                    clearInterval(interval);
+                    document.getElementById('status-title').innerText = "Payment Failed";
+                    document.getElementById('status-text').innerText = "The transaction was canceled or declined.";
+                    document.getElementById('status-icon').innerHTML = "❌";
+
+                    setTimeout(() => {
+                        window.location.href = "{% url 'paywall' %}";
+                    }, 3000);
+                }
+            } catch (error) {
+                console.error("Error checking payment status:", error);
+            }
+        }, 3000);
+    </script>
+</body>
+</html>
