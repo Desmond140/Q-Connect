@@ -9,6 +9,7 @@ urlpatterns = [
     path('register/', views.register, name='register'),
     path('like/<int:user_id>/', views.like_user, name='like_user'),
     path('skip/<int:user_id>/', views.skip_user, name='skip_user'),
+    path('paywall/', views.paywall_view, name='paywall'),
 
     # CHAT SYSTEM PATHS
     path('chat/<str:username>/', views.chat_room, name='chat_room'),

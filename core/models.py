@@ -23,6 +23,7 @@ GENDER_CHOICES = [
 
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
+    has_paid_chat_fee = models.BooleanField(default=False)
     bio = models.TextField(max_length=500, blank=True)
     gender = models.CharField(max_length=1, choices=GENDER_CHOICES)
     interested_in = models.CharField(max_length=1, choices=GENDER_CHOICES)

@@ -11,6 +11,8 @@ from django.http import JsonResponse
 from django.http import JsonResponse
 from django.db.models import Q
 from .models import Message
+from django.shortcuts import render, redirect
+from django.contrib.auth.decorators import login_required
 
 
 @login_required
@@ -196,3 +198,20 @@ def get_messages(request, username):
         msg.save()
 
     return JsonResponse({'messages': data})
+
+
+@login_required
+def chat_view(request, room_id):  # Or whatever arguments your current chat view takes
+    # Get the user's profile
+    profile = request.user.profile
+
+    # If they haven't paid, send them to the payment page
+    if not profile.has_paid_chat_fee:
+        return redirect('paywall')  # We will create this view next
+
+    # If they paid, let them proceed to the chat template
+    return render(request, 'core/chat.html', {'room_id': room_id})
+
+@login_required
+def paywall_view(request):
+    return render(request, 'core/paywall.html')
