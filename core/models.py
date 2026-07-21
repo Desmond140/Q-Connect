@@ -2,6 +2,8 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from django.db import models
+from django.contrib.auth.models import User # Or your custom User model if you use one
 
 RESIDENCE_CHOICES = [
     ('qwetu_chiromo', 'Qwetu Chiromo'),
@@ -67,3 +69,24 @@ class Message(models.Model):
 
     def __str__(self):
         return f"{self.sender.username} to {self.receiver.username}: {self.content[:20]}"
+
+
+class MpesaTransaction(models.Model):
+    STATUS_CHOICES = [
+        ('PENDING', 'Pending'),
+        ('COMPLETED', 'Completed'),
+        ('FAILED', 'Failed'),
+    ]
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='mpesa_transactions')
+    checkout_request_id = models.CharField(max_length=100, unique=True, db_index=True)
+    merchant_request_id = models.CharField(max_length=100, blank=True, null=True)
+    phone_number = models.CharField(max_length=15)
+    amount = models.DecimalField(max_digits=10, decimal_places=2, default=100.00)
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='PENDING')
+    mpesa_receipt_number = models.CharField(max_length=50, blank=True, null=True) # Populated on success callback
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.user.username} - {self.checkout_request_id} ({self.status})"

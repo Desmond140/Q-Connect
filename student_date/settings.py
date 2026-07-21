@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'core',
+    'django_daraja',
 ]
 
 MIDDLEWARE = [
@@ -138,3 +139,10 @@ MEDIA_ROOT = BASE_DIR / 'media'
 
 LOGIN_REDIRECT_URL = '/discover/'
 LOGOUT_REDIRECT_URL = '/'
+
+
+# M-Pesa Daraja Settings
+DARAJA_CONSUMER_KEY = "ilG5tITLJwRkYHkhg1y0stece8j0j3KGNtui9DJlZiGQzMw6"
+DARAJA_CONSUMER_SECRET = "emeFDrHL5ehyIgKahiY0JjojAfBvTZai6P2o3QHudK2vOrGxpBaOeMWrqoIswNAb"
+DARAJA_SHORTCODE = "174379"  # Default Safaricom Sandbox Shortcode
+DARAJA_PASSKEY = "bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919"  # Default Sandbox Passkey
